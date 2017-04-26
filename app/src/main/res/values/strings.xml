@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">MutiImageSelector</string>
+    <string name="muti_image_selector">选择照片或拍照</string>
+    <string name="all_images">所有图片</string>
+</resources>
