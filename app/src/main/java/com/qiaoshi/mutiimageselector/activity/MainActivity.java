@@ -31,15 +31,24 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Utils.checkApplicationFolder();
         initView();
-        toMutiImageSelectorActivity();
     }
 
     public void initView() {
         context = this;
-        recyclerview = (RecyclerView)findViewById(R.id.recyclerview);
+        recyclerview = findViewById(R.id.recyclerview);
         recyclerview.setLayoutManager(new GridLayoutManager(context, 3));
-
+        photoWallAdapter = new PhotoWallAdapter(context, selectedData, R.layout.item_photo_wall);
+        recyclerview.setAdapter(photoWallAdapter);
+        photoWallAdapter.setOnItemClickListener(new BaseRecyclerViewAdapter.OnItemClickListenter() {
+            @Override
+            public void OnItemClick(View view, int position) {
+                if("add".equals(selectedData.get(position))){
+                    toMutiImageSelectorActivity();
+                }
+            }
+        });
     }
+
     public void toMutiImageSelectorActivity(){
         Intent intent = new Intent(MainActivity.this, MutiImageSelectorActivity.class);
         intent.putExtra(MAX_SELECT_NUM,25);
@@ -52,30 +61,19 @@ public class MainActivity extends AppCompatActivity {
         switch(requestCode){
             case SELECTED_FINISH:
                 if(resultCode == RESULT_OK) {
-                    selectedData = data.getStringArrayListExtra(SELECTED_DATA);
-                    photoWallAdapter = new PhotoWallAdapter(context, selectedData, R.layout.item_photo_wall);
-                    recyclerview.setAdapter(photoWallAdapter);
-                    photoWallAdapter.setOnItemClickListener(new BaseRecyclerViewAdapter.OnItemClickListenter() {
-                        @Override
-                        public void OnItemClick(View view, int position) {
-                            if(selectedData.size()==position){
-                                toMutiImageSelectorActivity();
-                            }
-                        }
-                    });
+                    selectedData.clear();
+                    selectedData.addAll(data.getStringArrayListExtra(SELECTED_DATA));
+                    photoWallAdapter.notifyDataSetChanged();
                 }
                 break;
         }
     }
 
     class PhotoWallAdapter extends BaseRecyclerViewAdapter<String> {
-
         public PhotoWallAdapter(Context context, List<String> data, int itemLayoutId) {
             super(context, data, itemLayoutId, 3);
-            ArrayList<String> tempList = new ArrayList<>();
-            tempList.addAll(data);
-            tempList.add("add");
-            this.data = tempList;
+            data.add("add");
+            this.data = data;
         }
         @Override
         public void onBindViewHolder(BaseRecyclerViewAdapter.ViewHolder holder, final int position) {

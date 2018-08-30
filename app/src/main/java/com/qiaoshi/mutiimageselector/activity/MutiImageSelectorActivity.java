@@ -28,8 +28,6 @@ import com.qiaoshi.mutiimageselector.Utils;
 import com.qiaoshi.mutiimageselector.adapter.BaseRecyclerViewAdapter;
 import com.qiaoshi.mutiimageselector.adapter.MutiGallerySelectorAdapter;
 import com.qiaoshi.mutiimageselector.adapter.MutiImageSelectorAdapter;
-import com.qiaoshi.mutiimageselector.model.GalleryItem;
-import com.qiaoshi.mutiimageselector.model.ImageItem;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -62,15 +60,15 @@ public class MutiImageSelectorActivity extends AppCompatActivity implements Easy
     private Toolbar toolbar;
     private RecyclerView recyclerView;
     private MutiImageSelectorAdapter mutiImageSelectorAdapter;
-    private Map<String,List<ImageItem>> dataMap = new HashMap<>();
+    private Map<String,List<MutiGallerySelectorAdapter.ImageItem>> dataMap = new HashMap<>();
 
     private boolean isChoose;
     private boolean isAnimEnd = true;
     private LinearLayout choose;
     private RecyclerView chooseGalleryRecyclerView;
     private MutiGallerySelectorAdapter mutiGallerySelectorAdapter;
-    private List<ImageItem> selectedGallerytData = new ArrayList<>();
-    private List<GalleryItem> galleryItemList = new ArrayList<>();
+    private List<MutiGallerySelectorAdapter.ImageItem> selectedGallerytData = new ArrayList<>();
+    private List<MutiGallerySelectorAdapter.GalleryItem> galleryItemList = new ArrayList<>();
 
     private int maxSelectedNum;
     private int selectedNum;
@@ -91,29 +89,44 @@ public class MutiImageSelectorActivity extends AppCompatActivity implements Easy
         context = this;
         maxSelectedNum = getIntent().getIntExtra(MAX_SELECT_NUM,1);
         selectedData = getIntent().getStringArrayListExtra(SELECTED_DATA);
+        filterAddMorePath();
         selectedNum = selectedData==null?0:selectedData.size();
 
-        toolbar = (Toolbar)findViewById(R.id.toolbar);
+        toolbar = findViewById(R.id.toolbar);
         RelativeLayout toolbarView = (RelativeLayout)getLayoutInflater().inflate(R.layout.toolbar_muti_image,null);
         toolbar.addView(toolbarView);
-        back = (ImageView)toolbarView.findViewById(R.id.back);
+        back = toolbarView.findViewById(R.id.back);
         back.setOnClickListener(this);
-        finish = (TextView)toolbarView.findViewById(R.id.finish);
+        finish = toolbarView.findViewById(R.id.finish);
         String finishStr = selectedNum==0?"完成":"完成("+selectedNum+"/"+maxSelectedNum+")";
         finish.setText(finishStr);
         finish.setOnClickListener(this);
 
-        chooseGalleryRecyclerView = (RecyclerView)findViewById(R.id.choose_gallery_recyclerview);
+        chooseGalleryRecyclerView = findViewById(R.id.choose_gallery_recyclerview);
         chooseGalleryRecyclerView.setLayoutManager(new LinearLayoutManager(context));
         refreshMutiGallerySelectorAdapter(context.getResources().getString(R.string.all_images));
 
-        choose = (LinearLayout)findViewById(R.id.choose);
+        choose = findViewById(R.id.choose);
         choose.setOnClickListener(this);
 
-        recyclerView = (RecyclerView)findViewById(R.id.recyclerview);
+        recyclerView = findViewById(R.id.recyclerview);
         recyclerView.setLayoutManager(new GridLayoutManager(context, 3));
         refreshMutiImageSelectorAdapter();
     }
+
+    public void filterAddMorePath() {
+        for(int i=0;i<selectedData.size();i++) {
+            if("add".equals(selectedData.get(i))) {
+                selectedData.remove(i);
+                break;
+            }
+        }
+    }
+
+    public void addMorePath() {
+        selectedData.add("add");
+    }
+
     public boolean isImageUrlContained(String url){
         for (String imageUrl : selectedData){
             if(imageUrl.equals(url))
@@ -139,13 +152,13 @@ public class MutiImageSelectorActivity extends AppCompatActivity implements Easy
             String path = mCursor.getString(mCursor.getColumnIndex(MediaStore.Images.Media.DATA));
             String parentFileName = new File(path).getParentFile().getName();
             if(!dataMap.containsKey(parentFileName)){
-                List<ImageItem> childList = new ArrayList<>();
-                childList.add(new ImageItem(path, isImageUrlContained(path)));
+                List<MutiGallerySelectorAdapter.ImageItem> childList = new ArrayList<>();
+                childList.add(new MutiGallerySelectorAdapter.ImageItem(path, isImageUrlContained(path)));
                 dataMap.put(parentFileName, childList);
             }else{
-                dataMap.get(parentFileName).add(new ImageItem(path, isImageUrlContained(path)));
+                dataMap.get(parentFileName).add(new MutiGallerySelectorAdapter.ImageItem(path, isImageUrlContained(path)));
             }
-            selectedGallerytData.add(new ImageItem(path, isImageUrlContained(path)));
+            selectedGallerytData.add(new MutiGallerySelectorAdapter.ImageItem(path, isImageUrlContained(path)));
         }
         dataMap.put(context.getResources().getString(R.string.all_images), selectedGallerytData);
         mCursor.close();
@@ -155,15 +168,15 @@ public class MutiImageSelectorActivity extends AppCompatActivity implements Easy
     }
 
     public void map2GalleryList(){
-        List<ImageItem> allData = dataMap.get(context.getResources().getString(R.string.all_images));
-        galleryItemList.add(new GalleryItem(allData.get(0).imagePath, context.getResources().getString(R.string.all_images), allData.size()));
+        List<MutiGallerySelectorAdapter.ImageItem> allData = dataMap.get(context.getResources().getString(R.string.all_images));
+        galleryItemList.add(new MutiGallerySelectorAdapter.GalleryItem(allData.get(0).imagePath, context.getResources().getString(R.string.all_images), allData.size()));
         Iterator iterator = dataMap.entrySet().iterator();
         while (iterator.hasNext()){
             Map.Entry entry = (Map.Entry) iterator.next();
             String key = (String)entry.getKey();
             if(key!=context.getResources().getString(R.string.all_images)){
-                List<ImageItem> value = (List<ImageItem>)entry.getValue();
-                galleryItemList.add(new GalleryItem(value.get(0).imagePath, key, value.size()));
+                List<MutiGallerySelectorAdapter.ImageItem> value = (List<MutiGallerySelectorAdapter.ImageItem>)entry.getValue();
+                galleryItemList.add(new MutiGallerySelectorAdapter.GalleryItem(value.get(0).imagePath, key, value.size()));
             }
         }
     }
@@ -197,7 +210,7 @@ public class MutiImageSelectorActivity extends AppCompatActivity implements Easy
                     if(index<0){
                         grantCameraPermmision();
                     }else {
-                        ImageItem imageItem = selectedGallerytData.get(index);
+                        MutiGallerySelectorAdapter.ImageItem imageItem = selectedGallerytData.get(index);
                         if (!imageItem.isSelected) {
                             if(selectedNum<maxSelectedNum) {
                                 selectedNum++;
@@ -353,6 +366,7 @@ public class MutiImageSelectorActivity extends AppCompatActivity implements Easy
         chooseGalleryRecyclerView.startAnimation(translateAnimation);
     }
     public void finishWithData(){
+        addMorePath();
         Intent intent = new Intent();
         intent.putStringArrayListExtra(SELECTED_DATA, selectedData);
         setResult(RESULT_OK, intent);

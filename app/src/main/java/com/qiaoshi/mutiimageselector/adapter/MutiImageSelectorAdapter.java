@@ -8,17 +8,16 @@ import android.widget.RelativeLayout;
 
 import com.bumptech.glide.Glide;
 import com.qiaoshi.mutiimageselector.R;
-import com.qiaoshi.mutiimageselector.model.ImageItem;
 
 import java.util.ArrayList;
 import java.util.List;
 
-public class MutiImageSelectorAdapter extends BaseRecyclerViewAdapter<ImageItem> {
+public class MutiImageSelectorAdapter extends BaseRecyclerViewAdapter<MutiGallerySelectorAdapter.ImageItem> {
 
-    public MutiImageSelectorAdapter(Context context, List<ImageItem> data, int itemLayoutId, int column) {
+    public MutiImageSelectorAdapter(Context context, List<MutiGallerySelectorAdapter.ImageItem> data, int itemLayoutId, int column) {
         super(context, data, itemLayoutId, column);
-        List<ImageItem> tempList = new ArrayList<>();
-        tempList.add(new ImageItem("camera",false));
+        List<MutiGallerySelectorAdapter.ImageItem> tempList = new ArrayList<>();
+        tempList.add(new MutiGallerySelectorAdapter.ImageItem("camera",false));
         tempList.addAll(data);
         this.data = tempList;
     }
@@ -26,7 +25,7 @@ public class MutiImageSelectorAdapter extends BaseRecyclerViewAdapter<ImageItem>
     @Override
     public void onBindViewHolder(BaseRecyclerViewAdapter.ViewHolder holder, int position) {
 
-        ImageItem item = data.get(position);
+        MutiGallerySelectorAdapter.ImageItem item = data.get(position);
 
         RelativeLayout itemLayout = (RelativeLayout)holder.getViewById(R.id.item_layout);
         ImageView image = (ImageView)holder.getViewById(R.id.image);
@@ -45,13 +44,11 @@ public class MutiImageSelectorAdapter extends BaseRecyclerViewAdapter<ImageItem>
             select.setVisibility(View.GONE);
         }else{
             icon.setVisibility(View.GONE);
+            image.setVisibility(View.VISIBLE);
 
             Glide.with(context)
                     .load(item.imagePath)
-                    .crossFade()
-                    .override(200, 200)
                     .into(image);
-            select.setVisibility(View.VISIBLE);
             if(item.isSelected) {
                 cover.setVisibility(View.VISIBLE);
                 select.setImageResource(R.drawable.ic_check_circle_white_24dp);
@@ -59,6 +56,7 @@ public class MutiImageSelectorAdapter extends BaseRecyclerViewAdapter<ImageItem>
                 cover.setVisibility(View.INVISIBLE);
                 select.setImageResource(R.drawable.ic_radio_button_unchecked_white_24dp);
             }
+            select.setVisibility(View.VISIBLE);
         }
         final int index = position;
         itemLayout.setOnClickListener(new View.OnClickListener() {

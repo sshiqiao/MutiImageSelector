@@ -14,7 +14,7 @@ import java.io.File;
 
 public class Utils {
     public static String getApplicationFolderPath(){
-        return Environment.getExternalStorageDirectory() + File.separator +"/KEYS";
+        return Environment.getExternalStorageDirectory() + File.separator +"/MutilImageSelector";
     }
     public static void checkApplicationFolder(){
         File file = new File(getApplicationFolderPath());

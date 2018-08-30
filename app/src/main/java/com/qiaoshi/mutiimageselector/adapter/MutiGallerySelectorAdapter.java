@@ -8,11 +8,10 @@ import android.widget.TextView;
 
 import com.bumptech.glide.Glide;
 import com.qiaoshi.mutiimageselector.R;
-import com.qiaoshi.mutiimageselector.model.GalleryItem;
 
 import java.util.List;
 
-public class MutiGallerySelectorAdapter extends BaseRecyclerViewAdapter<GalleryItem> {
+public class MutiGallerySelectorAdapter extends BaseRecyclerViewAdapter<MutiGallerySelectorAdapter.GalleryItem> {
     private String selectedGallery;
     public MutiGallerySelectorAdapter(Context context, List<GalleryItem> data, int itemLayoutId, int column, String selectedGallery) {
         super(context, data, itemLayoutId, column);
@@ -29,8 +28,6 @@ public class MutiGallerySelectorAdapter extends BaseRecyclerViewAdapter<GalleryI
         ImageView checkbox = (ImageView)holder.getViewById(R.id.checkbox);
         Glide.with(context)
                 .load(item.firstImagePath)
-                .crossFade()
-                .override(200, 200)
                 .into(image);
         galleryName.setText(item.galleryName);
         galleryNum.setText(item.galleryNum+"张");
@@ -50,4 +47,24 @@ public class MutiGallerySelectorAdapter extends BaseRecyclerViewAdapter<GalleryI
         });
     }
 
+
+    public static class ImageItem {
+        public String imagePath;
+        public boolean isSelected;
+        public ImageItem (String imagePath, boolean isSelected) {
+            this.imagePath = imagePath;
+            this.isSelected = isSelected;
+        }
+    }
+
+    public static class GalleryItem {
+        public String firstImagePath;
+        public String galleryName;
+        public int galleryNum;
+        public GalleryItem(String firstImagePath, String galleryName, int galleryNum) {
+            this.firstImagePath = firstImagePath;
+            this.galleryName = galleryName;
+            this.galleryNum = galleryNum;
+        }
+    }
 }
